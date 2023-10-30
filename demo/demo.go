@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"myzap"
 	"sync"
 	"time"
 
+	"github.com/lupc/go-myzap"
 	"go.uber.org/zap"
 )
 
