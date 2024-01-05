@@ -15,6 +15,7 @@ type MyZapConfig struct {
 	ConsoleLevel       zapcore.LevelEnabler //控制台日记级别
 	LogDirFormat       string               //日志目录格式 (年月日yyyyMMdd，时分秒HHmmss，使用{}包含) 如：./logs/{yyyy-MM}/
 	LogNameFormat      string               //日志文件格式 (年月日yyyyMMdd，时分秒HHmmss，使用{}包含) 如：test_{HH}
+	TimeFormat         string               //时间显示格式
 	LogExt             string               //日志文件后缀 如：log
 	IsLogToFile        bool                 //是否输出到文件
 	IsLogToConsole     bool                 //是否输出到控制台
@@ -32,7 +33,12 @@ func (c *MyZapConfig) BuildLogger() (logger *zap.Logger) {
 		return
 	}
 	var zc zapcore.Core = nil
-	var encoder = zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
+	var encCfg = zap.NewDevelopmentEncoderConfig()
+	if c.TimeFormat != "" {
+		encCfg.EncodeTime = zapcore.TimeEncoderOfLayout(c.TimeFormat)
+	}
+	var encoder = zapcore.NewConsoleEncoder(encCfg)
+
 	if c.IsLogToFile {
 		fileWriter := c.getFileWriter()
 		var fc = zapcore.NewCore(encoder, zapcore.AddSync(fileWriter), c.FileLevel)
@@ -80,6 +86,7 @@ func NewConfigByName(logName string) (cfg *MyZapConfig) {
 		ConsoleLevel:       zapcore.InfoLevel,
 		LogDirFormat:       "./logs/{yyyy-MM}/",
 		LogNameFormat:      fmt.Sprintf("%v_{yyyy-MM-dd}", logName),
+		TimeFormat:         "2006-01-02 15:04:05.0000",
 		LogExt:             "log",
 		IsLogToFile:        true,
 		IsLogToConsole:     true,
